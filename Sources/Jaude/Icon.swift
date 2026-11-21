@@ -29,11 +29,11 @@ enum IconStyle: String, CaseIterable, Identifiable {
                 drawBar(NSRect(x: 1, y: 7.5, width: 16, height: 5), s)
                 drawBar(NSRect(x: 1, y: 3.5, width: 16, height: 2), w)
             case .level:
-                drawLevel(rect, min(s, w))
+                drawRing(rect, session: s, week: w, liquid: true)
             case .battery:
                 drawBattery(min(s, w))
             case .ring:
-                drawRing(rect, session: s, week: w)
+                drawRing(rect, session: s, week: w, liquid: false)
             }
             return true
         }
@@ -53,21 +53,7 @@ private func drawBar(_ r: NSRect, _ fraction: Double) {
     NSBezierPath(roundedRect: fill, xRadius: radius, yRadius: radius).fill()
 }
 
-private func drawLevel(_ rect: NSRect, _ fraction: Double) {
-    let circle = NSBezierPath(ovalIn: rect.insetBy(dx: 1.5, dy: 1.5))
-    circle.lineWidth = 1.2
-    NSColor.black.withAlphaComponent(0.5).setStroke()
-    circle.stroke()
-    guard fraction > 0 else { return }
-    NSGraphicsContext.saveGraphicsState()
-    NSBezierPath(ovalIn: rect.insetBy(dx: 3, dy: 3)).addClip()
-    let inner = rect.insetBy(dx: 3, dy: 3)
-    NSColor.black.setFill()
-    NSRect(x: inner.minX, y: inner.minY, width: inner.width, height: inner.height * fraction).fill()
-    NSGraphicsContext.restoreGraphicsState()
-}
-
-// Battery and level show the tighter of the two limits: that is the one that will block first.
+// Battery shows the tighter of the two limits: that is the one that will block first.
 private func drawBattery(_ fraction: Double) {
     let body = NSRect(x: 1, y: 3.5, width: 20, height: 9)
     let outline = NSBezierPath(roundedRect: body.insetBy(dx: 0.5, dy: 0.5), xRadius: 2.5, yRadius: 2.5)
@@ -82,7 +68,8 @@ private func drawBattery(_ fraction: Double) {
                  xRadius: 1.2, yRadius: 1.2).fill()
 }
 
-private func drawRing(_ rect: NSRect, session: Double, week: Double) {
+// Outer ring = week left. Inner disc = session left, as a pie or as a liquid level.
+private func drawRing(_ rect: NSRect, session: Double, week: Double, liquid: Bool) {
     let c = NSPoint(x: rect.midX, y: rect.midY)
 
     func arc(_ radius: CGFloat, _ fraction: Double, pie: Bool) -> NSBezierPath {
@@ -107,5 +94,14 @@ private func drawRing(_ rect: NSRect, session: Double, week: Double) {
         outer.lineCapStyle = .round
         outer.stroke()
     }
-    if session > 0 { arc(4.5, session, pie: true).fill() }
+    guard session > 0 else { return }
+    if liquid {
+        let inner = rect.insetBy(dx: 3.5, dy: 3.5)
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(ovalIn: inner).addClip()
+        NSRect(x: inner.minX, y: inner.minY, width: inner.width, height: inner.height * session).fill()
+        NSGraphicsContext.restoreGraphicsState()
+    } else {
+        arc(4.5, session, pie: true).fill()
+    }
 }
