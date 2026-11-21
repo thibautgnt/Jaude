@@ -26,7 +26,7 @@ From the slider button in the panel:
 
 Requires macOS 26 or later, on a Mac where Claude Code is signed in with a Pro, Max, Team or Enterprise plan.
 
-Download `Jaude.zip` from the [latest release](https://github.com/thibautgnt/Jaude/releases/latest), unzip it and move `Jaude.app` to Applications. Jaude is not notarized: the first time, open it from System Settings > Privacy & Security > Open Anyway.
+Download `Jaude-<version>.dmg` (or `Jaude.zip`) from the [latest release](https://github.com/thibautgnt/Jaude/releases/latest) and drag `Jaude.app` to Applications. It is signed with a Developer ID and notarized by Apple, so it opens without any warning.
 
 ## How it works
 
@@ -49,7 +49,8 @@ Needs the Xcode Command Line Tools only.
 make install   # build, sign ad hoc, copy to ~/Applications and launch
 make check     # parsing and pace checks against a recorded response
 make icon      # regenerate the app icon from Icon/render.swift
-make release   # zip and dmg in dist/, published as a GitHub release
+make release   # Developer ID signed, notarized zip and dmg in dist/
+make publish   # make release, then publish dist/ as a GitHub release
 ```
 
 ## License
