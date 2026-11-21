@@ -1,3 +1,4 @@
 .build/
 Jaude.app/
 .DS_Store
+dist/

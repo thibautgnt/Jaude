@@ -1,24 +1,57 @@
-# Jaude
+<div align="center">
+  <img src="docs/icon.png" width="128" height="128" alt="Jaude icon" />
+  <h1>Jaude</h1>
+  <p><strong>Your Claude subscription limits, at a glance in the menu bar.</strong></p>
+</div>
 
-A minimal macOS menu bar gauge for your Claude subscription usage.
+Jaude puts one small gauge in the macOS menu bar. No numbers, no noise: it starts full and drains as you use Claude, so you know where you stand without opening anything.
 
-The menu bar shows a single icon, no numbers: it shows what is left of your session and your week. It starts full and drains as you use Claude. The settings menu in the panel picks the icon style (bars, level, battery, ring), the refresh interval and whether Jaude opens at login. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled. A bar turns orange when your pace would run it out before it resets, red when it is nearly gone or burning far too fast.
+Click it for the details:
+
+- every limit Claude reports: the current session, the week, and per-model weekly limits such as Fable;
+- what is left of each one and when it resets;
+- usage credits, when they are enabled on your plan.
+
+Each bar is blue while you are on track, orange when your pace would run it out before it resets, and red when it is nearly gone or burning far too fast.
+
+## Settings
+
+From the slider button in the panel:
+
+- **Menu bar icon**: bars, level, battery or ring;
+- **Refresh every** 2, 5 or 15 minutes;
+- **Open at Login**.
+
+## Install
+
+Requires macOS 26 or later, on a Mac where Claude Code is signed in with a Pro, Max, Team or Enterprise plan.
+
+Download `Jaude.zip` from the [latest release](https://github.com/thibautgnt/Jaude/releases/latest), unzip it and move `Jaude.app` to Applications. Jaude is not notarized: the first time, open it from System Settings > Privacy & Security > Open Anyway.
 
 ## How it works
 
-Jaude reads the OAuth token Claude Code stores in your login keychain (`Claude Code-credentials`) and calls the same usage endpoint as `/usage` in Claude Code, every 5 minutes by default and when you open the panel. Nothing else leaves your Mac. It never refreshes the token itself: if it has expired, opening Claude Code refreshes it.
+Jaude reads the sign-in token Claude Code keeps in your login keychain and asks Claude's usage endpoint, the one behind `/usage` in Claude Code, for your limits. That request is the only thing that leaves your Mac.
 
-Requires macOS 26+ and Claude Code logged in with a Pro, Max, Team or Enterprise plan.
+It is built to go unnoticed:
+
+- one request per refresh interval, none while the screen sleeps;
+- opening the panel only refreshes when the data is more than 2 minutes old;
+- the token stays in memory; the keychain is read again only when the server refuses it;
+- Jaude never refreshes the token itself. If it has expired, opening Claude Code renews it.
+
+The usage endpoint is undocumented and may change without notice.
 
 ## Build
 
 Needs the Xcode Command Line Tools only.
 
 ```sh
-make install   # builds, signs ad hoc, copies to ~/Applications and launches
-make check     # decodes a recorded response and checks the parsing
+make install   # build, sign ad hoc, copy to ~/Applications and launch
+make check     # parsing and pace checks against a recorded response
+make icon      # regenerate the app icon from Icon/render.swift
+make release   # zip and dmg in dist/, published as a GitHub release
 ```
 
-## Note
+## License
 
-The usage endpoint is undocumented and may change without notice.
+MIT
