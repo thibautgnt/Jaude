@@ -13,6 +13,12 @@ struct Usage: Decodable {
         spend = try? c.decodeIfPresent(Spend.self, forKey: .spend)
     }
 
+    /// Share of the allowance still available, 0...1; 0 when the limit is absent.
+    func remaining(_ kind: String) -> Double {
+        guard let used = limits.first(where: { $0.kind == kind })?.percent else { return 0 }
+        return min(max(1 - used / 100, 0), 1)
+    }
+
     static func decode(_ data: Data) throws -> Usage {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase

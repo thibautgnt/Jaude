@@ -8,7 +8,7 @@ The menu bar shows a single icon, no numbers: the outer ring is what is left of 
 
 Jaude reads the OAuth token Claude Code stores in your login keychain (`Claude Code-credentials`) and calls the same usage endpoint as `/usage` in Claude Code, every 5 minutes and when you open the panel. Nothing else leaves your Mac. It never refreshes the token itself: if it has expired, opening Claude Code refreshes it.
 
-Requires macOS 14+ and Claude Code logged in with a Pro, Max, Team or Enterprise plan.
+Requires macOS 26+ and Claude Code logged in with a Pro, Max, Team or Enterprise plan.
 
 ## Build
 
