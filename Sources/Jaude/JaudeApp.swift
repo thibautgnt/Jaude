@@ -135,7 +135,6 @@ struct Panel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 11) {
-            header
             ForEach(store.usage?.limits ?? []) { LimitCard(limit: $0) }
             if let spend = store.usage?.spend, spend.enabled, let used = spend.used {
                 HStack {
@@ -157,22 +156,6 @@ struct Panel: View {
         .background(.black.opacity(0.25))
     }
 
-    private var header: some View {
-        HStack {
-            Text("JAUDE")
-                .font(.system(size: 17, weight: .heavy))
-                .kerning(0.5)
-            if let updated = store.updated {
-                Text(updated, format: .relative(presentation: .named))
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer()
-            glassButton("arrow.clockwise", help: "Refresh") { Task { await store.refresh() } }
-        }
-    }
-
     private var footer: some View {
         HStack {
             if let error = store.error {
@@ -180,8 +163,13 @@ struct Panel: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.red.opacity(0.9))
                     .lineLimit(2)
+            } else if let updated = store.updated {
+                Text(updated, format: .relative(presentation: .named))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
             }
             Spacer()
+            glassButton("arrow.clockwise", help: "Refresh") { Task { await store.refresh() } }
             glassButton("power", help: "Quit Jaude") { NSApp.terminate(nil) }
         }
     }
