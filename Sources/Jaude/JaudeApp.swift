@@ -126,15 +126,16 @@ struct Panel: View {
 
 struct LimitRow: View {
     let limit: Limit
+    private var left: Double { min(max(100 - limit.percent, 0), 100) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
                 Text(limit.title).font(.system(size: 13, weight: .medium))
                 Spacer()
-                Text("\(Int(limit.percent.rounded())) %").monospacedDigit().foregroundStyle(.secondary)
+                Text("\(Int(left.rounded())) % left").monospacedDigit().foregroundStyle(.secondary)
             }
-            ProgressView(value: min(limit.percent, 100), total: 100)
+            ProgressView(value: left, total: 100)
                 .tint(limit.percent >= 100 ? .red : limit.severity == "normal" ? .accentColor : .orange)
             if let reset = limit.resetDate {
                 Text("Resets \(resetText(reset))").font(.caption).foregroundStyle(.secondary)
