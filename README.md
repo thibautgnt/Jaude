@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/icon.png" width="128" height="128" alt="Jaude icon" />
+  <img src="docs/icon.svg" width="128" height="128" alt="Jaude icon" />
   <h1>Jaude</h1>
   <p><strong>Your Claude subscription limits, at a glance in the menu bar.</strong></p>
 </div>
