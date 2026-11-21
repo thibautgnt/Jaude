@@ -225,7 +225,13 @@ struct Panel: View {
 struct LimitCard: View {
     let limit: Limit
     private var left: Double { min(max(100 - limit.percent, 0), 100) }
-    private var color: Color { left == 0 ? .red : limit.severity == "normal" ? .accentColor : .orange }
+    private var color: Color {
+        switch limit.pace() {
+        case .fine: .accentColor
+        case .fast: .orange
+        case .critical: .red
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

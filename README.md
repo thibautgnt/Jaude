@@ -2,7 +2,7 @@
 
 A minimal macOS menu bar gauge for your Claude subscription usage.
 
-The menu bar shows a single icon, no numbers: it shows what is left of your session and your week. It starts full and drains as you use Claude. The settings menu in the panel picks the icon style (bars, level, battery, ring), the refresh interval and whether Jaude opens at login. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled.
+The menu bar shows a single icon, no numbers: it shows what is left of your session and your week. It starts full and drains as you use Claude. The settings menu in the panel picks the icon style (bars, level, battery, ring), the refresh interval and whether Jaude opens at login. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled. A bar turns orange when your pace would run it out before it resets, red when it is nearly gone or burning far too fast.
 
 ## How it works
 

@@ -49,6 +49,29 @@ struct Limit: Decodable, Identifiable {
         }
     }
 
+    enum Pace { case fine, fast, critical }
+
+    /// Compares usage with the time elapsed in the window: using more than the elapsed share means the limit runs out before it resets.
+    func pace(now: Date = .now) -> Pace {
+        let used = percent / 100
+        if used >= 0.9 || (severity ?? "normal") != "normal" && used >= 0.75 { return .critical }
+        var projected = 0.0
+        if let reset = resetDate, let window {
+            let elapsed = 1 - reset.timeIntervalSince(now) / window
+            // Too early in the window, the projection is noise.
+            if elapsed >= 0.1 { projected = used / elapsed }
+        }
+        if projected >= 1.5 { return .critical }
+        if used >= 0.75 || projected >= 1 || (severity ?? "normal") != "normal" { return .fast }
+        return .fine
+    }
+
+    private var window: TimeInterval? {
+        if kind == "session" { return 5 * 3600 }
+        if kind.hasPrefix("weekly") { return 7 * 86_400 }
+        return nil
+    }
+
     var resetDate: Date? {
         guard let s = resetsAt else { return nil }
         let f = ISO8601DateFormatter()
