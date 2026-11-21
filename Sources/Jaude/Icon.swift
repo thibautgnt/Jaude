@@ -20,7 +20,7 @@ enum IconStyle: String, CaseIterable, Identifiable {
         let width: CGFloat = switch self {
         case .bars: 18
         case .level: 16
-        case .battery: 24
+        case .battery: 20
         case .ring: 16
         }
         let image = NSImage(size: NSSize(width: width, height: 16), flipped: false) { rect in
@@ -55,12 +55,12 @@ private func drawBar(_ r: NSRect, _ fraction: Double) {
 
 // Battery shows the tighter of the two limits: that is the one that will block first.
 private func drawBattery(_ fraction: Double) {
-    let body = NSRect(x: 1, y: 3.5, width: 20, height: 9)
+    let body = NSRect(x: 1, y: 3.5, width: 16, height: 9)
     let outline = NSBezierPath(roundedRect: body.insetBy(dx: 0.5, dy: 0.5), xRadius: 2.5, yRadius: 2.5)
     outline.lineWidth = 1
     NSColor.black.withAlphaComponent(0.5).set()
     outline.stroke()
-    NSBezierPath(roundedRect: NSRect(x: 21.5, y: 6.5, width: 1.5, height: 3), xRadius: 0.75, yRadius: 0.75).fill()
+    NSBezierPath(roundedRect: NSRect(x: 17.5, y: 6.5, width: 1.5, height: 3), xRadius: 0.75, yRadius: 0.75).fill()
     guard fraction > 0 else { return }
     let inner = body.insetBy(dx: 2, dy: 2)
     NSColor.black.setFill()

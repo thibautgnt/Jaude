@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Fixed width: styles differ in size, and a resize would leave the open popover anchored to the old spot.
-        statusItem = NSStatusBar.system.statusItem(withLength: 30)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(toggle)
 
