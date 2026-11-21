@@ -2,7 +2,7 @@
 
 A minimal macOS menu bar gauge for your Claude subscription usage.
 
-The menu bar shows a single icon, no numbers: the outer ring fills with your weekly usage, the inner disc with your current session. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled.
+The menu bar shows a single icon, no numbers: the outer ring is what is left of your week, the inner disc what is left of your current session. Both start full and drain as you use Claude. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled.
 
 ## How it works
 

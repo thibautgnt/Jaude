@@ -9,7 +9,7 @@ struct JaudeApp: App {
         MenuBarExtra {
             Panel(store: store)
         } label: {
-            Image(nsImage: gauge(session: store.fraction("session"), week: store.fraction("weekly_all")))
+            Image(nsImage: gauge(session: store.remaining("session"), week: store.remaining("weekly_all")))
         }
         .menuBarExtraStyle(.window)
     }
@@ -30,8 +30,10 @@ final class Store: ObservableObject {
         }
     }
 
-    func fraction(_ kind: String) -> Double {
-        (usage?.limits.first { $0.kind == kind }?.percent ?? 0) / 100
+    // No data yet stays empty rather than pretending everything is left.
+    func remaining(_ kind: String) -> Double {
+        guard let used = usage?.limits.first(where: { $0.kind == kind })?.percent else { return 0 }
+        return 1 - used / 100
     }
 
     func refresh() async {
@@ -49,7 +51,7 @@ final class Store: ObservableObject {
     }
 }
 
-/// Outer ring = weekly usage, inner disc = session usage.
+/// Outer ring = weekly allowance left, inner disc = session allowance left.
 func gauge(session: Double, week: Double) -> NSImage {
     let image = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in
         let c = NSPoint(x: rect.midX, y: rect.midY)
