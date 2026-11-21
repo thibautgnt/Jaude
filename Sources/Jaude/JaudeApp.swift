@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import ServiceManagement
 import SwiftUI
 
 @main
@@ -21,7 +22,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var iconUpdates: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // Fixed width: styles differ in size, and a resize would leave the open popover anchored to the old spot.
+        statusItem = NSStatusBar.system.statusItem(withLength: 30)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(toggle)
 
@@ -58,13 +60,49 @@ final class Store: ObservableObject {
         didSet { UserDefaults.standard.set(iconStyle.rawValue, forKey: "iconStyle") }
     }
 
+    @Published var refreshMinutes = UserDefaults.standard.object(forKey: "refreshMinutes") as? Int ?? 5 {
+        didSet {
+            UserDefaults.standard.set(refreshMinutes, forKey: "refreshMinutes")
+            startPolling()
+        }
+    }
+    @Published private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
+    private var polling: Task<Void, Never>?
+
+    private var observers: [NSObjectProtocol] = []
+
     init() {
-        Task {
-            while true {
+        startPolling()
+        // No calls while the screen sleeps; one fresh fetch on wake.
+        let center = NSWorkspace.shared.notificationCenter
+        observers = [
+            center.addObserver(forName: NSWorkspace.screensDidSleepNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.polling?.cancel() }
+            },
+            center.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.startPolling() }
+            },
+        ]
+    }
+
+    private func startPolling() {
+        polling?.cancel()
+        polling = Task {
+            while !Task.isCancelled {
                 await refresh()
-                try? await Task.sleep(for: .seconds(300))
+                // Tolerance lets macOS fold this wake-up into others.
+                try? await Task.sleep(for: .seconds(refreshMinutes * 60), tolerance: .seconds(30))
             }
         }
+    }
+
+    func setLaunchAtLogin(_ on: Bool) {
+        do {
+            if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+        } catch {
+            self.error = "Open at login: \(error.localizedDescription)"
+        }
+        launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
     func refresh() async {
@@ -78,7 +116,7 @@ final class Store: ObservableObject {
     }
 
     func refreshIfStale() async {
-        if updated.map({ Date.now.timeIntervalSince($0) > 60 }) ?? true { await refresh() }
+        if updated.map({ Date.now.timeIntervalSince($0) > 120 }) ?? true { await refresh() }
     }
 }
 
@@ -136,14 +174,19 @@ struct Panel: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            iconMenu
+            settingsMenu
             glassButton("arrow.clockwise", help: "Refresh") { Task { await store.refresh() } }
             glassButton("power", help: "Quit Jaude") { NSApp.terminate(nil) }
         }
     }
 
-    private var iconMenu: some View {
+    private var settingsMenu: some View {
         Menu {
+            Toggle("Open at Login", isOn: Binding(get: { store.launchAtLogin }, set: { store.setLaunchAtLogin($0) }))
+            // Kept at 2 minutes or more: the usage endpoint rate-limits frequent polling.
+            Picker("Refresh Every", selection: $store.refreshMinutes) {
+                ForEach([2, 5, 15], id: \.self) { Text("\($0) minutes").tag($0) }
+            }
             Picker("Menu bar icon", selection: $store.iconStyle) {
                 ForEach(IconStyle.allCases) { style in
                     Label {
@@ -164,7 +207,7 @@ struct Panel: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .help("Menu bar icon")
+        .help("Settings")
     }
 
     private func glassButton(_ symbol: String, help: String, action: @escaping () -> Void) -> some View {

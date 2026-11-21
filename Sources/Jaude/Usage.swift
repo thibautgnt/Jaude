@@ -88,6 +88,7 @@ enum UsageError: LocalizedError {
     }
 }
 
+@MainActor
 enum UsageAPI {
     // Going through /usr/bin/security reuses the keychain access Claude Code already granted, so no prompt.
     static func token() throws -> String {
@@ -110,16 +111,29 @@ enum UsageAPI {
         return creds.claudeAiOauth.accessToken
     }
 
+    private static var cachedToken: String?
+
     static func fetch() async throws -> Usage {
-        var req = URLRequest(url: URL(string: "https://api.anthropic.com/api/oauth/usage")!)
-        req.setValue("Bearer \(try token())", forHTTPHeaderField: "Authorization")
-        req.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
-        let (data, response) = try await URLSession.shared.data(for: req)
-        switch (response as? HTTPURLResponse)?.statusCode ?? 0 {
+        let cached = cachedToken
+        var (data, status) = try await get(cached ?? token())
+        // Claude Code rotates the token: re-read the keychain only when the cached one is refused.
+        if status == 401, cached != nil { (data, status) = try await get(token()) }
+        switch status {
         case 200: return try Usage.decode(data)
-        case 401: throw UsageError.expired
+        case 401:
+            cachedToken = nil
+            throw UsageError.expired
         case 429: throw UsageError.rateLimited
         case let code: throw UsageError.http(code)
         }
+    }
+
+    private static func get(_ token: String) async throws -> (Data, Int) {
+        cachedToken = token
+        var req = URLRequest(url: URL(string: "https://api.anthropic.com/api/oauth/usage")!)
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
+        let (data, response) = try await URLSession.shared.data(for: req)
+        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
     }
 }
