@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaude</title>
+<meta name="description" content="Your Claude subscription limits, at a glance in the macOS menu bar.">
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    --bg: #f7f8fb; --fg: #14161c; --muted: #5d6472; --line: #e3e6ee;
+    --accent: #2f5bea; --accent-fg: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0e1015; --fg: #eef0f5; --muted: #9aa1b0; --line: #23262f; --accent: #5b82ff; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+  main { max-width: 620px; margin: 0 auto; padding: 72px 20px 56px; text-align: center; }
+  .icon { width: 112px; height: 112px; }
+  h1 { font-size: 40px; letter-spacing: -0.02em; margin: 16px 0 6px; }
+  .tagline { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
+  .styles { display: flex; justify-content: center; gap: 18px; margin: 0 0 32px; color: var(--fg); }
+  .styles svg { width: 28px; height: 28px; }
+  .button {
+    display: inline-block; background: var(--accent); color: var(--accent-fg); text-decoration: none;
+    font-weight: 600; padding: 12px 26px; border-radius: 12px;
+  }
+  .meta { color: var(--muted); font-size: 14px; margin: 12px 0 44px; }
+  ul { list-style: none; padding: 0; margin: 0 auto; text-align: left; max-width: 480px; }
+  li { padding: 14px 0; border-top: 1px solid var(--line); }
+  li strong { display: block; }
+  li span { color: var(--muted); }
+  footer { margin-top: 44px; font-size: 14px; color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <img class="icon" src="icon.png" alt="">
+  <h1>Jaude</h1>
+  <p class="tagline">Your Claude limits, at a glance in the menu bar.</p>
+
+  <div class="styles" aria-label="Menu bar icon styles">
+    <svg viewBox="0 0 18 16" aria-hidden="true"><rect x="1" y="3.5" width="16" height="5" rx="2.5" opacity=".25" fill="currentColor"/><rect x="1" y="3.5" width="11" height="5" rx="2.5" fill="currentColor"/><rect x="1" y="10.5" width="16" height="2" rx="1" opacity=".25" fill="currentColor"/><rect x="1" y="10.5" width="13" height="2" rx="1" fill="currentColor"/></svg>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"/><path d="M8 1.25A6.75 6.75 0 1 1 1.25 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="4.5" fill="currentColor" opacity=".15"/><path d="M3.6 9.1h8.8A4.5 4.5 0 0 1 3.6 9.1z" fill="currentColor"/></svg>
+    <svg viewBox="0 0 20 16" aria-hidden="true"><rect x="1.5" y="4" width="15" height="8" rx="2.5" fill="none" stroke="currentColor" opacity=".5"/><rect x="17.5" y="6.5" width="1.5" height="3" rx=".75" fill="currentColor" opacity=".5"/><rect x="3" y="5.5" width="8" height="5" rx="1.2" fill="currentColor"/></svg>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"/><path d="M8 1.25A6.75 6.75 0 0 1 14.75 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="4.5" fill="currentColor" opacity=".15"/><path d="M8 8V3.5A4.5 4.5 0 1 1 3.5 8z" fill="currentColor"/></svg>
+  </div>
+
+  <a class="button" href="https://github.com/thibautgnt/Jaude/releases/latest/download/Jaude.zip">Download for Mac</a>
+  <p class="meta">Free and open source · macOS 26+ · Apple silicon · signed and notarized</p>
+
+  <ul>
+    <li><strong>Drains as you go</strong><span>One small icon, no numbers. Full at the start, empty when you hit the limit.</span></li>
+    <li><strong>Every limit, one click away</strong><span>Session, week and per-model limits, what is left of each and when it resets.</span></li>
+    <li><strong>Warns before you run out</strong><span>Bars turn orange when your pace would hit the limit before it resets, red when it is nearly gone.</span></li>
+    <li><strong>Goes unnoticed</strong><span>One request every few minutes, none while the screen sleeps. Nothing else leaves your Mac.</span></li>
+  </ul>
+
+  <footer>Needs Claude Code signed in with a Pro, Max, Team or Enterprise plan. <a href="https://github.com/thibautgnt/Jaude">Source on GitHub</a></footer>
+</main>
+</body>
+</html>
