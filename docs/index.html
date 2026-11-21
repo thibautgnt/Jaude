@@ -20,7 +20,18 @@
     font: 16px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   }
   main { max-width: 620px; margin: 0 auto; padding: 72px 20px 56px; text-align: center; }
-  .icon { width: 112px; height: 112px; }
+  .icon { width: 112px; height: 112px; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .28)); }
+  .wave { animation: swell 4.5s linear infinite; }
+  .wave.back { animation-duration: 7s; animation-direction: reverse; }
+  .tide { animation: bob 3.2s ease-in-out infinite alternate; }
+  .arc { transform-box: view-box; transform-origin: 512px 512px; transform: rotate(-90deg); animation: breathe 5s ease-in-out infinite alternate; }
+  @keyframes swell { to { transform: translateX(392px); } }
+  @keyframes bob { from { transform: translateY(-7px); } to { transform: translateY(7px); } }
+  @keyframes breathe {
+    from { transform: rotate(-96deg); stroke-dasharray: 69 100; }
+    to { transform: rotate(-84deg); stroke-dasharray: 75 100; }
+  }
+  @media (prefers-reduced-motion: reduce) { .wave, .tide, .arc { animation: none; } }
   h1 { font-size: 40px; letter-spacing: -0.02em; margin: 16px 0 6px; }
   .tagline { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
   .styles { display: flex; justify-content: center; gap: 18px; margin: 0 0 32px; color: var(--fg); }
@@ -40,7 +51,27 @@
 </head>
 <body>
 <main>
-  <img class="icon" src="icon.png" alt="">
+  <svg class="icon" viewBox="0 0 1024 1024" role="img" aria-label="Jaude icon">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="100" x2="0" y2="924" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#548fff"/><stop offset="1" stop-color="#1a38b3"/></linearGradient>
+      <linearGradient id="sheen" x1="0" y1="100" x2="0" y2="464" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <clipPath id="disc"><circle cx="512" cy="512" r="196"/></clipPath>
+      <filter id="lift" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="9" flood-opacity=".25"/></filter>
+    </defs>
+    <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#sheen)"/>
+    <g filter="url(#lift)">
+      <circle cx="512" cy="512" r="282" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="54"/>
+      <circle class="arc" cx="512" cy="512" r="282" fill="none" stroke="#fff" stroke-width="54" stroke-linecap="round" pathLength="100" stroke-dasharray="72 100"/>
+    </g>
+    <circle cx="512" cy="512" r="196" fill="#fff" fill-opacity=".16"/>
+    <g clip-path="url(#disc)">
+      <g class="tide">
+        <path class="wave back" d="M-76 470q98-26 196 0t196 0t196 0t196 0t196 0t196 0V760H-76z" fill="#fff" fill-opacity=".35"/>
+        <path class="wave" d="M-76 481q98-28 196 0t196 0t196 0t196 0t196 0t196 0V760H-76z" fill="#fff"/>
+      </g>
+    </g>
+  </svg>
   <h1>Jaude</h1>
   <p class="tagline">Your Claude limits, at a glance in the menu bar.</p>
 
