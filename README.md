@@ -2,7 +2,7 @@
 
 A minimal macOS menu bar gauge for your Claude subscription usage.
 
-The menu bar shows a single icon, no numbers: the outer ring is what is left of your week, the inner disc what is left of your current session. Both start full and drain as you use Claude. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled.
+The menu bar shows a single icon, no numbers: it shows what is left of your session and your week. It starts full and drains as you use Claude. Four icon styles (bars, level, battery, ring) can be picked from the panel. Click it to see every limit Claude reports (session, week, per-model weekly limits such as Fable), when each one resets, and usage credits when they are enabled.
 
 ## How it works
 

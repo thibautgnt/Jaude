@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var iconUpdates: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(toggle)
 
@@ -29,8 +29,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.animates = true
         popover.contentViewController = NSHostingController(rootView: Panel(store: store))
 
-        iconUpdates = store.$usage.sink { [weak self] usage in
-            self?.statusItem.button?.image = gauge(
+        iconUpdates = store.$usage.combineLatest(store.$iconStyle).sink { [weak self] usage, style in
+            self?.statusItem.button?.image = style.image(
                 session: usage?.remaining("session") ?? 0,
                 week: usage?.remaining("weekly_all") ?? 0
             )
@@ -54,6 +54,9 @@ final class Store: ObservableObject {
     @Published var usage: Usage?
     @Published var error: String?
     @Published var updated: Date?
+    @Published var iconStyle = IconStyle(rawValue: UserDefaults.standard.string(forKey: "iconStyle") ?? "") ?? .bars {
+        didSet { UserDefaults.standard.set(iconStyle.rawValue, forKey: "iconStyle") }
+    }
 
     init() {
         Task {
@@ -77,42 +80,6 @@ final class Store: ObservableObject {
     func refreshIfStale() async {
         if updated.map({ Date.now.timeIntervalSince($0) > 60 }) ?? true { await refresh() }
     }
-}
-
-/// Outer ring = weekly allowance left, inner disc = session allowance left.
-func gauge(session: Double, week: Double) -> NSImage {
-    let image = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in
-        let c = NSPoint(x: rect.midX, y: rect.midY)
-
-        func arc(_ radius: CGFloat, _ fraction: Double, pie: Bool) -> NSBezierPath {
-            let p = NSBezierPath()
-            if pie { p.move(to: c) }
-            p.appendArc(withCenter: c, radius: radius, startAngle: 90,
-                        endAngle: 90 - 360 * min(max(fraction, 0), 1), clockwise: true)
-            if pie { p.close() }
-            return p
-        }
-
-        let track = NSBezierPath(ovalIn: rect.insetBy(dx: 1.25, dy: 1.25))
-        track.lineWidth = 1.5
-        NSColor.black.withAlphaComponent(0.3).setStroke()
-        track.stroke()
-
-        NSColor.black.withAlphaComponent(0.15).setFill()
-        NSBezierPath(ovalIn: rect.insetBy(dx: 3.5, dy: 3.5)).fill()
-
-        NSColor.black.set()
-        if week > 0 {
-            let ring = arc(6.75, week, pie: false)
-            ring.lineWidth = 1.5
-            ring.lineCapStyle = .round
-            ring.stroke()
-        }
-        if session > 0 { arc(4.5, session, pie: true).fill() }
-        return true
-    }
-    image.isTemplate = true
-    return image
 }
 
 // Liquid Glass is for controls only; content sits on a matte surface so highlights never cross the text.
@@ -169,9 +136,35 @@ struct Panel: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            iconMenu
             glassButton("arrow.clockwise", help: "Refresh") { Task { await store.refresh() } }
             glassButton("power", help: "Quit Jaude") { NSApp.terminate(nil) }
         }
+    }
+
+    private var iconMenu: some View {
+        Menu {
+            Picker("Menu bar icon", selection: $store.iconStyle) {
+                ForEach(IconStyle.allCases) { style in
+                    Label {
+                        Text(style.title)
+                    } icon: {
+                        Image(nsImage: style.image(session: 0.7, week: 0.4))
+                    }
+                    .tag(style)
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 13, weight: .semibold))
+                .padding(4)
+                .glassControl()
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Menu bar icon")
     }
 
     private func glassButton(_ symbol: String, help: String, action: @escaping () -> Void) -> some View {
