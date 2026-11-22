@@ -20,6 +20,7 @@ From the slider button in the panel:
 
 - **Menu bar icon**: bars, level, battery or ring;
 - **Refresh every** 2, 5 or 15 minutes;
+- **Show Tokens and Cost**: under each limit, the tokens Claude Code used in that window and what they would cost at API list prices (on by default);
 - **Open at Login**.
 
 ## Install
@@ -38,6 +39,8 @@ It is built to go unnoticed:
 - opening the panel only refreshes when the data is more than 2 minutes old;
 - the token stays in memory; the keychain is read again only when the server refuses it;
 - Jaude never refreshes the token itself. If it has expired, opening Claude Code renews it.
+
+Tokens and cost come from the transcripts Claude Code writes in `~/.claude/projects`, read on your Mac. They only count Claude Code on this Mac, not claude.ai, the desktop app or other machines, so they can be lower than what the limits reflect. The cost is an estimate at API list prices, not what your plan costs.
 
 The usage endpoint is undocumented and may change without notice.
 

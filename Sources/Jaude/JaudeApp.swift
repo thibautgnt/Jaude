@@ -66,6 +66,15 @@ final class Store: ObservableObject {
             startPolling()
         }
     }
+    @Published var showLocal = UserDefaults.standard.object(forKey: "showLocal") as? Bool ?? true {
+        didSet {
+            UserDefaults.standard.set(showLocal, forKey: "showLocal")
+            replies = []
+            if showLocal { Task { await scanLocal() } }
+        }
+    }
+    @Published var replies: [Reply] = []
+    private let scanner = TranscriptScanner()
     @Published private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
     private var polling: Task<Void, Never>?
 
@@ -113,6 +122,12 @@ final class Store: ObservableObject {
         } catch {
             self.error = error.localizedDescription
         }
+        await scanLocal()
+    }
+
+    private func scanLocal() async {
+        guard showLocal, let start = usage?.limits.compactMap(\.windowStart).min() else { return }
+        replies = await scanner.replies(since: start)
     }
 
     func refreshIfStale() async {
@@ -140,7 +155,9 @@ struct Panel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 11) {
-            ForEach(store.usage?.limits ?? []) { LimitCard(limit: $0) }
+            ForEach(store.usage?.limits ?? []) { limit in
+                LimitCard(limit: limit, tally: store.showLocal ? limit.tally(store.replies) : nil)
+            }
             if let spend = store.usage?.spend, spend.enabled, let used = spend.used {
                 HStack {
                     Text("Usage credits").font(.system(size: 13, weight: .semibold))
@@ -182,6 +199,7 @@ struct Panel: View {
 
     private var settingsMenu: some View {
         Menu {
+            Toggle("Show Tokens and Cost", isOn: $store.showLocal)
             Toggle("Open at Login", isOn: Binding(get: { store.launchAtLogin }, set: { store.setLaunchAtLogin($0) }))
             // Kept at 2 minutes or more: the usage endpoint rate-limits frequent polling.
             Picker("Refresh Every", selection: $store.refreshMinutes) {
@@ -224,6 +242,7 @@ struct Panel: View {
 
 struct LimitCard: View {
     let limit: Limit
+    var tally: Tally?
     private var left: Double { min(max(100 - limit.percent, 0), 100) }
     private var color: Color {
         switch limit.pace() {
@@ -254,6 +273,13 @@ struct LimitCard: View {
                 Label("Resets \(resetText(reset))", systemImage: "arrow.counterclockwise")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
+            }
+            if let tally {
+                Text(tally.text)
+                    .font(.system(size: 10))
+                    .monospacedDigit()
+                    .foregroundStyle(.tertiary)
+                    .help("Claude Code on this Mac only, priced at API list rates")
             }
         }
         .padding(10)

@@ -20,7 +20,7 @@ install: build
 
 check:
 	mkdir -p .build
-	swiftc Sources/Jaude/Usage.swift Tests/check/main.swift -o .build/check
+	swiftc Sources/Jaude/Usage.swift Sources/Jaude/LocalUsage.swift Tests/check/main.swift -o .build/check
 	.build/check Tests/check/usage.json
 
 # Regenerates Icon/AppIcon.icns and docs/icon.png from Icon/render.swift.

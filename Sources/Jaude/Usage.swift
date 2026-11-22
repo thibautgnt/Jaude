@@ -66,7 +66,7 @@ struct Limit: Decodable, Identifiable {
         return .fine
     }
 
-    private var window: TimeInterval? {
+    var window: TimeInterval? {
         if kind == "session" { return 5 * 3600 }
         if kind.hasPrefix("weekly") { return 7 * 86_400 }
         return nil
