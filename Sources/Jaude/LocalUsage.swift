@@ -11,10 +11,27 @@ struct Reply {
 struct Tally: Equatable {
     var tokens = 0
     var cost = 0.0
+    var models: [String: Int] = [:]
 
     var text: String {
         let t = tokens.formatted(.number.notation(.compactName).precision(.significantDigits(2)))
         return "\(t) tokens · ~\(cost.formatted(.currency(code: "USD").precision(.fractionLength(2))))"
+    }
+
+    /// Top three models by share of tokens, e.g. "Opus 5.5 72% · Sonnet 5.5 20%".
+    var modelsText: String {
+        guard tokens > 0 else { return "" }
+        return models.filter { $0.value > 0 }.sorted { $0.value > $1.value }.prefix(3)
+            .map { "\(Tally.name($0.key)) \(Int((Double($0.value) / Double(tokens) * 100).rounded()))%" }
+            .joined(separator: " · ")
+    }
+
+    /// "claude-sonnet-4-5-20250929" -> "Sonnet 4.5"
+    static func name(_ model: String) -> String {
+        let parts = model.replacingOccurrences(of: "claude-", with: "").split(separator: "-")
+        guard let family = parts.first else { return model }
+        let version = parts.dropFirst().filter { $0.count <= 2 && $0.allSatisfy(\.isNumber) }.joined(separator: ".")
+        return version.isEmpty ? family.capitalized : "\(family.capitalized) \(version)"
     }
 }
 
@@ -107,6 +124,7 @@ extension Limit {
             guard r.date >= start, model.map({ r.model.contains($0) }) ?? true else { return }
             t.tokens += r.tokens
             t.cost += r.cost
+            t.models[r.model, default: 0] += r.tokens
         }
     }
 }

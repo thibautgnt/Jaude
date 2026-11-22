@@ -29,6 +29,9 @@ var scoped = limit("weekly_scoped", 10, resetIn: 24 * hour)
 scoped.scope = .init(model: .init(displayName: "Fable"))
 let replies = [Reply(date: .now, model: "claude-fable-5-2", tokens: 10, cost: 1), Reply(date: .now, model: "claude-opus-5-5", tokens: 5, cost: 2),
                Reply(date: .now.addingTimeInterval(-8 * 24 * hour), model: "claude-opus-5-5", tokens: 99, cost: 9)]
-assert(scoped.tally(replies) == Tally(tokens: 10, cost: 1))
-assert(limit("weekly_all", 10, resetIn: 24 * hour).tally(replies) == Tally(tokens: 15, cost: 3))
+assert(scoped.tally(replies) == Tally(tokens: 10, cost: 1, models: ["claude-fable-5-2": 10]))
+let all = limit("weekly_all", 10, resetIn: 24 * hour).tally(replies)!
+assert(all == Tally(tokens: 15, cost: 3, models: ["claude-fable-5-2": 10, "claude-opus-5-5": 5]))
+assert(all.modelsText == "Fable 5.2 67% · Opus 5.5 33%")
+assert(Tally.name("claude-sonnet-4-5-20250929") == "Sonnet 4.5")
 print("ok")

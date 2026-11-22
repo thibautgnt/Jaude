@@ -29,7 +29,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         popover.behavior = .transient
         popover.animates = true
-        popover.contentViewController = NSHostingController(rootView: Panel(store: store))
+        let host = NSHostingController(rootView: Panel(store: store))
+        // Without it the window grows upward from its bottom edge when the panel gets taller while open.
+        host.sizingOptions = .preferredContentSize
+        popover.contentViewController = host
 
         iconUpdates = store.$usage.combineLatest(store.$iconStyle).sink { [weak self] usage, style in
             self?.statusItem.button?.image = style.image(
@@ -280,6 +283,13 @@ struct LimitCard: View {
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
                     .help("Claude Code on this Mac only, priced at API list rates")
+                if !tally.modelsText.isEmpty {
+                    Text(tally.modelsText)
+                        .font(.system(size: 10))
+                        .monospacedDigit()
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
             }
         }
         .padding(10)
